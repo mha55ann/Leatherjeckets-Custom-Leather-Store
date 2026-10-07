@@ -2,7 +2,7 @@
 
 This archive contains the complete Leatherjeckets workspace source: the React storefront, shared Express API, OpenAPI contract and generated client, PostgreSQL schema, sample catalog, and workspace configuration.
 
-## Run in Replit
+ 
 
 The project uses the Replit-managed development database and the configured storefront/API workflows. The `DATABASE_URL` is supplied by the environment.
 
