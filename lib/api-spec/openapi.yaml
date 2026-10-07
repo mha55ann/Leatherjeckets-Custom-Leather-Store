@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: products
+    description: Public storefront product catalogue
+  - name: custom-inquiries
+    description: Customer requests for made-to-measure jacket quotes
 paths:
   /healthz:
     get:
@@ -24,6 +28,60 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List published jackets
+      responses:
+        "200":
+          description: Published products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+  /products/{slug}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a jacket by its slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Jacket details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Product not found
+  /custom-inquiries:
+    post:
+      operationId: createCustomInquiry
+      tags: [custom-inquiries]
+      summary: Request a made-to-measure jacket quote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomInquiryInput"
+      responses:
+        "201":
+          description: Inquiry received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomInquiry"
+        "400":
+          description: Invalid inquiry
 components:
   schemas:
     HealthStatus:
@@ -33,4 +91,100 @@ components:
           type: string
       required:
         - status
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        priceCents:
+          type: integer
+        currency:
+          type: string
+        leatherType:
+          type: string
+        color:
+          type: string
+        imageUrl:
+          type: string
+        sizes:
+          type: array
+          items:
+            type: string
+        productionDays:
+          type: integer
+        badge:
+          type: [string, "null"]
+        featured:
+          type: boolean
+      required:
+        - id
+        - slug
+        - name
+        - category
+        - description
+        - priceCents
+        - currency
+        - leatherType
+        - color
+        - imageUrl
+        - sizes
+        - productionDays
+        - featured
+    CustomInquiryInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        country:
+          type: string
+          minLength: 2
+          maxLength: 100
+        message:
+          type: string
+          minLength: 10
+          maxLength: 4000
+        productSlug:
+          type: [string, "null"]
+        leatherType:
+          type: [string, "null"]
+        color:
+          type: [string, "null"]
+        size:
+          type: [string, "null"]
+        measurements:
+          type: [string, "null"]
+      required:
+        - name
+        - email
+        - country
+        - message
+    CustomInquiry:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [received]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - status
+        - createdAt
 

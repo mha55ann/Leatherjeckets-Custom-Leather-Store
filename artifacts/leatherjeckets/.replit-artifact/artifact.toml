@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Leatherjeckets"
+description = "An international made-to-order leather jacket storefront for browsing handcrafted pieces, personalizing a jacket, requesting a custom quote, and starting an order."
+version = "1.0.0"
+id = "artifacts/leatherjeckets"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20659
+
+[services.development]
+run = "pnpm --filter @workspace/leatherjeckets run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/leatherjeckets", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/leatherjeckets/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20659"
+BASE_PATH = "/"
