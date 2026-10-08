@@ -1,33 +1,9 @@
-import {
-  Component,
-  type ComponentType,
-  type ErrorInfo,
-  type ReactNode,
-} from 'react';
+import { Component } from 'react';
 
-export interface ErrorFallbackProps {
-  error: Error;
-  resetError: () => void;
-}
+function toError(value) {
+  if (value instanceof Error) return value;
+  if (typeof value === 'string') return new Error(value);
 
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  FallbackComponent?: ComponentType<ErrorFallbackProps>;
-  /** Changing this clears a caught error. Pass the route to recover on navigation. */
-  resetKey?: unknown;
-}
-
-interface ErrorBoundaryState {
-  error: Error | null;
-}
-
-function toError(value: unknown): Error {
-  if (value instanceof Error) {
-    return value;
-  }
-  if (typeof value === 'string') {
-    return new Error(value);
-  }
   try {
     return new Error(JSON.stringify(value));
   } catch {
@@ -35,7 +11,7 @@ function toError(value: unknown): Error {
   }
 }
 
-function DefaultFallback({ error, resetError }: ErrorFallbackProps) {
+function DefaultFallback({ error, resetError }) {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-6">
       <div className="max-w-lg w-full text-center">
@@ -46,7 +22,6 @@ function DefaultFallback({ error, resetError }: ErrorFallbackProps) {
           This part of the app hit an error. The rest of the app is still
           running.
         </p>
-        {/* Dev only: messages can carry API responses and other internals. */}
         {import.meta.env.DEV ? (
           <pre className="mt-4 overflow-x-auto rounded bg-gray-100 p-3 text-left text-xs text-gray-800">
             {error.message || String(error)}
@@ -64,17 +39,14 @@ function DefaultFallback({ error, resetError }: ErrorFallbackProps) {
   );
 }
 
-export class ErrorBoundary extends Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
-  state: ErrorBoundaryState = { error: null };
+export class ErrorBoundary extends Component {
+  state = { error: null };
 
-  static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
+  static getDerivedStateFromError(error) {
     return { error: toError(error) };
   }
 
-  componentDidCatch(error: unknown, info: ErrorInfo): void {
+  componentDidCatch(error, info) {
     console.error(
       'ErrorBoundary caught an error:',
       toError(error),
@@ -82,24 +54,23 @@ export class ErrorBoundary extends Component<
     );
   }
 
-  componentDidUpdate(prevProps: ErrorBoundaryProps): void {
+  componentDidUpdate(previousProps) {
     if (
       this.state.error !== null &&
-      prevProps.resetKey !== this.props.resetKey
+      previousProps.resetKey !== this.props.resetKey
     ) {
       this.resetError();
     }
   }
 
-  resetError = (): void => {
+  resetError = () => {
     this.setState({ error: null });
   };
 
-  render(): ReactNode {
+  render() {
     const { error } = this.state;
-    if (error === null) {
-      return this.props.children;
-    }
+    if (error === null) return this.props.children;
+
     const Fallback = this.props.FallbackComponent ?? DefaultFallback;
     return <Fallback error={error} resetError={this.resetError} />;
   }

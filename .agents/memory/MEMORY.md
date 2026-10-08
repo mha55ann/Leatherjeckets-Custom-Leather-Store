@@ -1,0 +1,1 @@
+- [Payment budget](payment-budget.md) — prefer no setup/monthly cost and disclose transaction fees when comparing payment options.
